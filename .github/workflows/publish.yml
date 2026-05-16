@@ -6,21 +6,6 @@ on:
     paths:
       - 'app/**'
       - '.github/workflows/publish.yml'
-  workflow_dispatch:
-    inputs:
-      bump:
-        description: 'Version bump (relative to the version on the Marketplace)'
-        type: choice
-        default: patch
-        options: [patch, minor, major]
-      dry_run:
-        description: 'Build & package only, do not publish'
-        type: boolean
-        default: false
-      publish_ovsx:
-        description: 'Also publish to Open VSX'
-        type: boolean
-        default: false
 
 permissions:
   contents: write
@@ -41,8 +26,6 @@ jobs:
       # the engine is fetched at runtime by the extension itself, and
       # `bin/**` is excluded by .vscodeignore anyway.
       LATEXSTUDIO_SKIP_DOWNLOAD: '1'
-      # Default to patch bumps on push-to-main. workflow_dispatch can override.
-      BUMP: ${{ github.event.inputs.bump || 'patch' }}
 
     steps:
       - name: Checkout
@@ -62,63 +45,43 @@ jobs:
           set -euo pipefail
           publisher=$(node -p "require('./package.json').publisher")
           name=$(node -p "require('./package.json').name")
+          local_version=$(node -p "require('./package.json').version")
           id="${publisher}.${name}"
-          echo "Extension id: $id"
-          echo "Bump kind:    ${BUMP}"
+          echo "Extension id:  $id"
+          echo "Local version: ${local_version}"
 
-          # Marketplace lookup runs in Node so we can use built-in fetch.
-          # On any failure (404, network, parse) we fall back to the version
-          # already in package.json — that path is used on the very first
-          # publish when the extension doesn't exist on the Marketplace yet.
-          next=$(BUMP="$BUMP" ID="$id" LOCAL="$(node -p "require('./package.json').version")" node <<'NODE'
-            const id = process.env.ID;
-            const bump = process.env.BUMP || 'patch';
-            const local = process.env.LOCAL;
+          # Query the public Marketplace API (no auth required for read).
+          # Pipe the JSON into `node -e` via stdin to dodge all heredoc / quoting issues.
+          resp=$(curl -fsS -X POST \
+            "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery" \
+            -H "Accept: application/json;api-version=3.0-preview.1" \
+            -H "Content-Type: application/json" \
+            --data "{\"filters\":[{\"criteria\":[{\"filterType\":7,\"value\":\"$id\"}]}],\"flags\":914}" \
+            || echo '')
 
-            function nextSemver(v, kind) {
-              const [maj, min, pat] = v.split('.').map(n => parseInt(n, 10) || 0);
-              if (kind === 'major') return `${maj + 1}.0.0`;
-              if (kind === 'minor') return `${maj}.${min + 1}.0`;
-              return `${maj}.${min}.${pat + 1}`;
-            }
+          published=""
+          if [ -n "$resp" ]; then
+            published=$(printf '%s' "$resp" | node -e "
+              let s='';process.stdin.on('data',d=>s+=d);process.stdin.on('end',()=>{
+                try {
+                  const j = JSON.parse(s);
+                  const v = j?.results?.[0]?.extensions?.[0]?.versions?.[0]?.version;
+                  console.log(v || '');
+                } catch { console.log(''); }
+              });
+            ")
+          fi
 
-            (async () => {
-              try {
-                const res = await fetch(
-                  'https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery',
-                  {
-                    method: 'POST',
-                    headers: {
-                      'Accept': 'application/json;api-version=3.0-preview.1',
-                      'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                      filters: [{ criteria: [{ filterType: 7, value: id }] }],
-                      flags: 0x100
-                    })
-                  }
-                );
-                const j = await res.json();
-                const published = j?.results?.[0]?.extensions?.[0]?.versions?.[0]?.version;
-                if (published) {
-                  const n = nextSemver(published, bump);
-                  console.error(`Marketplace latest: ${published}  →  next: ${n}`);
-                  process.stdout.write(n);
-                  return;
-                }
-                console.error(`Extension ${id} not found on Marketplace. First publish uses local version: ${local}`);
-                process.stdout.write(local);
-              } catch (err) {
-                console.error(`Marketplace query failed: ${err.message}. Falling back to local version: ${local}`);
-                process.stdout.write(local);
-              }
-            })();
-          NODE
-          )
-
-          if [ -z "$next" ]; then
-            echo "::error::Failed to determine next version."
-            exit 1
+          if [ -z "$published" ]; then
+            # First-ever publish: use the version already in package.json as-is.
+            next="$local_version"
+            echo "Extension $id not found on Marketplace. First publish uses local: $next"
+          else
+            next=$(node -e "
+              const [a,b,c] = '$published'.split('.').map(n => parseInt(n,10) || 0);
+              console.log(a + '.' + b + '.' + (c + 1));
+            ")
+            echo "Marketplace latest: $published  ->  next: $next"
           fi
 
           # Update package.json in-flight (not committed back to the repo).
@@ -132,7 +95,7 @@ jobs:
             echo "id=$id"
             echo "vsix=$vsix"
           } >> "$GITHUB_OUTPUT"
-          echo "Packaging as: $vsix"
+          echo "Packaging as:  $vsix"
 
       - name: Install dependencies
         run: |
@@ -159,20 +122,22 @@ jobs:
           if-no-files-found: error
 
       - name: Publish to VS Code Marketplace
-        if: ${{ github.event.inputs.dry_run != 'true' }}
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: npx vsce publish --packagePath "${{ steps.pkg.outputs.vsix }}"
 
       - name: Publish to Open VSX
-        if: ${{ github.event.inputs.dry_run != 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.publish_ovsx == 'true') }}
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
-        run: npx ovsx publish "${{ steps.pkg.outputs.vsix }}" -p "$OVSX_PAT"
+        run: |
+          if [ -z "${OVSX_PAT:-}" ]; then
+            echo "OVSX_PAT not set; skipping Open VSX publish."
+            exit 0
+          fi
+          npx ovsx publish "${{ steps.pkg.outputs.vsix }}" -p "$OVSX_PAT"
         continue-on-error: true
 
       - name: Create GitHub Release
-        if: ${{ github.event.inputs.dry_run != 'true' }}
         uses: softprops/action-gh-release@v2
         with:
           files: app/${{ steps.pkg.outputs.vsix }}
