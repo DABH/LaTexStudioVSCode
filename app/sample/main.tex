@@ -1,0 +1,32 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{microtype}
+\usepackage{amsmath, amssymb}
+\usepackage{hyperref}
+
+\title{LaTeX Studio --- Sample Document}
+\author{You}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This is a tiny sample to verify the \textbf{LaTeX Studio} extension is working.
+Try editing this file and saving --- the preview on the right should refresh.
+
+\section{Math looks crisp}
+Vector-rendered math is one of the reasons we ship the actual PDF in the preview
+instead of an HTML approximation:
+\begin{equation}
+  \int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
+\end{equation}
+
+\section{A list}
+\begin{itemize}
+  \item Auto-build on save
+  \item PDF.js preview with zoom
+  \item Tectonic engine, no TeX install required
+\end{itemize}
+
+\end{document}

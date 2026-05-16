@@ -21,7 +21,20 @@ LaTeX Studio turns VS Code into a complete LaTeX authoring environment — no Te
 3. Press `Ctrl+K V` (macOS: `Cmd+K V`) to open the preview to the side.
 4. Press `Ctrl+Alt+B` to build — or just save. That's it.
 
-On first build, you'll be prompted to download the Tectonic engine (~30 MB). If you'd rather use a TeX distribution you already have installed, see [Bring your own engine](#bring-your-own-engine) below.
+> **First-run heads-up:** the first time you build, you'll see a one-time prompt to download the LaTeX engine (~30 MB). Click **Download** and grab a coffee — it's a one-shot setup. Builds after that are fast and offline. If you'd rather use a TeX distribution you already have installed, see [Bring your own engine](#bring-your-own-engine) below.
+
+## What gets installed, and when
+
+LaTeX Studio is deliberately small. The actual LaTeX toolchain is downloaded on demand so the extension stays lightweight.
+
+| When | What happens | Size | Notes |
+|---|---|---|---|
+| Install the extension | Nothing extra is downloaded | ~35 KB | Pure JS, ships from the Marketplace |
+| **First build** *(one-time prompt)* | Downloads the [Tectonic](https://tectonic-typesetting.github.io/) engine for your OS | ~30 MB | Stored inside the extension folder |
+| First time a document uses a LaTeX package | Tectonic fetches it from [CTAN](https://ctan.org/) and caches it locally | varies | Per-user cache, reused across projects |
+| Subsequent builds | Fully offline | 0 | No network access |
+
+Behind a corporate proxy or air-gapped? Either configure a system proxy so the first-run downloads can reach `github.com` and `ctan.org`, or set `latexStudio.engine` to `xelatex` / `lualatex` / `pdflatex` to use an existing TeX install instead — nothing extra will be downloaded in that case.
 
 ## What you get
 

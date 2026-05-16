@@ -1,0 +1,208 @@
+{
+  "name": "latex-studio",
+  "displayName": "LaTeX Studio",
+  "description": "High-quality LaTeX → PDF compilation with live preview, powered by Tectonic and PDF.js.",
+  "version": "0.1.4",
+  "publisher": "latex-studio",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Other"
+  ],
+  "icon": "media/icon.png",
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "latex",
+        "aliases": [
+          "LaTeX",
+          "latex",
+          "tex"
+        ],
+        "extensions": [
+          ".tex",
+          ".ltx",
+          ".sty",
+          ".cls"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "latex",
+        "path": "./snippets/latex.json"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "latexStudio.pdfEditor",
+        "displayName": "LaTeX Studio PDF Preview",
+        "selector": [
+          { "filenamePattern": "*.pdf" }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "latexStudio.build",
+        "title": "LaTeX: Build PDF",
+        "icon": "$(play)"
+      },
+      {
+        "command": "latexStudio.showPreview",
+        "title": "LaTeX: Open Preview",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "latexStudio.showPreviewToSide",
+        "title": "LaTeX: Open Preview to the Side",
+        "icon": "$(open-preview)"
+      },
+      {
+        "command": "latexStudio.forwardSearch",
+        "title": "LaTeX: Jump to PDF (SyncTeX Forward Search)"
+      },
+      {
+        "command": "latexStudio.clean",
+        "title": "LaTeX: Clean Build Artifacts"
+      },
+      {
+        "command": "latexStudio.openLog",
+        "title": "LaTeX: Show Build Log"
+      },
+      {
+        "command": "latexStudio.downloadEngine",
+        "title": "LaTeX: Download/Update Tectonic Engine"
+      },
+      {
+        "command": "latexStudio.resetAllData",
+        "title": "LaTeX Studio: Reset Everything (Before Uninstall)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "latexStudio.build",
+        "key": "ctrl+alt+b",
+        "mac": "cmd+alt+b",
+        "when": "editorLangId == latex"
+      },
+      {
+        "command": "latexStudio.showPreviewToSide",
+        "key": "ctrl+k v",
+        "mac": "cmd+k v",
+        "when": "editorLangId == latex"
+      },
+      {
+        "command": "latexStudio.forwardSearch",
+        "key": "ctrl+alt+j",
+        "mac": "cmd+alt+j",
+        "when": "editorLangId == latex"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "latexStudio.showPreviewToSide",
+          "when": "resourceLangId == latex",
+          "group": "navigation"
+        },
+        {
+          "command": "latexStudio.build",
+          "when": "resourceLangId == latex",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "latexStudio.build",
+          "when": "editorLangId == latex"
+        },
+        {
+          "command": "latexStudio.showPreview",
+          "when": "editorLangId == latex"
+        },
+        {
+          "command": "latexStudio.showPreviewToSide",
+          "when": "editorLangId == latex"
+        },
+        {
+          "command": "latexStudio.forwardSearch",
+          "when": "editorLangId == latex"
+        },
+        {
+          "command": "latexStudio.clean",
+          "when": "editorLangId == latex"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "LaTeX Studio",
+      "properties": {
+        "latexStudio.engine": {
+          "type": "string",
+          "enum": [
+            "tectonic",
+            "xelatex",
+            "lualatex",
+            "pdflatex"
+          ],
+          "default": "tectonic",
+          "description": "LaTeX engine used for compilation. 'tectonic' is bundled and requires no system install."
+        },
+        "latexStudio.tectonicPath": {
+          "type": "string",
+          "default": "",
+          "description": "Optional override path to a tectonic executable. Leave empty to use the bundled engine."
+        },
+        "latexStudio.build.onSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically rebuild the PDF when a .tex file is saved."
+        },
+        "latexStudio.build.outputDirectory": {
+          "type": "string",
+          "default": ".latex-build",
+          "description": "Output directory (relative to root .tex) for the compiled PDF and intermediates."
+        },
+        "latexStudio.preview.invertColors": {
+          "type": "boolean",
+          "default": false,
+          "description": "Invert PDF colors in the preview (dark mode)."
+        },
+        "latexStudio.preview.renderScale": {
+          "type": "number",
+          "default": 1.5,
+          "minimum": 0.5,
+          "maximum": 3,
+          "description": "Render scale multiplier for the PDF preview (higher = sharper, more memory)."
+        },
+        "latexStudio.preview.openOnBuild": {
+          "type": "boolean",
+          "default": true,
+          "description": "Open the preview panel automatically after a successful first build."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "build-icon": "node ./scripts/build-icon.js",
+    "postinstall": "node ./scripts/download-tectonic.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.90.0",
+    "pdfjs-dist": "^4.7.76",
+    "sharp": "^0.34.5",
+    "typescript": "^5.4.5"
+  }
+}
