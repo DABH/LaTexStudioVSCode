@@ -25,16 +25,29 @@ export class PreviewManager {
       this.disposePanel();
     }
 
-    if (!this.panel) {
+    const isNew = !this.panel;
+    if (isNew) {
       this.viewColumn = column;
       this.createPanel(pdfPath);
     } else {
-      this.panel.reveal(column, true);
+      this.panel!.reveal(column, true);
     }
 
     this.currentPdf = pdfPath;
-    if (this.panel) {
+
+    // Only assign HTML when the webview is freshly created. Reassigning
+    // `webview.html` while a load is already in flight would remount the
+    // page and race with any pending `refresh()` postMessage, leading to
+    // cross-contaminated page renders (e.g. page 1 drawn into slot 2).
+    if (isNew && this.panel) {
       this.panel.webview.html = this.renderHtml(pdfPath);
+    } else if (this.panel && pdfPath) {
+      // Existing panel: just hot-swap the PDF via the reload message path.
+      const uri = this.panel.webview.asWebviewUri(vscode.Uri.file(pdfPath));
+      this.panel.webview.postMessage({
+        type: 'reload',
+        url: `${uri.toString()}?v=${Date.now()}`
+      });
     }
   }
 
