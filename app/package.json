@@ -3,7 +3,7 @@
   "displayName": "LaTeX Studio",
   "description": "High-quality LaTeX → PDF compilation with live preview, powered by Tectonic and PDF.js.",
   "version": "0.1.4",
-  "publisher": "latex-studio",
+  "publisher": "bipulraman",
   "engines": {
     "vscode": "^1.90.0"
   },

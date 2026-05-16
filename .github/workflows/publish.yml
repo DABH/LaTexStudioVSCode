@@ -51,9 +51,21 @@ jobs:
           cache: 'npm'
           cache-dependency-path: app/package-lock.json
 
-      - name: Read current version
+      - name: Read extension identifier
         id: pkg
-        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+        shell: bash
+        run: |
+          version=$(node -p "require('./package.json').version")
+          publisher=$(node -p "require('./package.json').publisher")
+          name=$(node -p "require('./package.json').name")
+          vsix="${publisher}.${name}-${version}.vsix"
+          {
+            echo "version=$version"
+            echo "publisher=$publisher"
+            echo "name=$name"
+            echo "vsix=$vsix"
+          } >> "$GITHUB_OUTPUT"
+          echo "Will package as $vsix"
 
       - name: Decide whether to publish
         id: gate
@@ -98,34 +110,34 @@ jobs:
 
       - name: Package VSIX
         if: steps.gate.outputs.proceed == 'true'
-        run: npx vsce package --out "latex-studio-${{ steps.pkg.outputs.version }}.vsix"
+        run: npx vsce package --out "${{ steps.pkg.outputs.vsix }}"
 
       - name: Upload VSIX artifact
         if: steps.gate.outputs.proceed == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: latex-studio-${{ steps.pkg.outputs.version }}-vsix
-          path: app/latex-studio-${{ steps.pkg.outputs.version }}.vsix
+          name: ${{ steps.pkg.outputs.publisher }}.${{ steps.pkg.outputs.name }}-${{ steps.pkg.outputs.version }}
+          path: app/${{ steps.pkg.outputs.vsix }}
           if-no-files-found: error
 
       - name: Publish to VS Code Marketplace
         if: ${{ steps.gate.outputs.proceed == 'true' && github.event.inputs.dry_run != 'true' }}
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: npx vsce publish --packagePath "latex-studio-${{ steps.pkg.outputs.version }}.vsix"
+        run: npx vsce publish --packagePath "${{ steps.pkg.outputs.vsix }}"
 
       - name: Publish to Open VSX
         if: ${{ steps.gate.outputs.proceed == 'true' && github.event.inputs.dry_run != 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.publish_ovsx == 'true') }}
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
-        run: npx ovsx publish "latex-studio-${{ steps.pkg.outputs.version }}.vsix" -p "$OVSX_PAT"
+        run: npx ovsx publish "${{ steps.pkg.outputs.vsix }}" -p "$OVSX_PAT"
         continue-on-error: true
 
       - name: Create GitHub Release
         if: ${{ steps.gate.outputs.proceed == 'true' && github.event.inputs.dry_run != 'true' }}
         uses: softprops/action-gh-release@v2
         with:
-          files: app/latex-studio-${{ steps.pkg.outputs.version }}.vsix
+          files: app/${{ steps.pkg.outputs.vsix }}
           generate_release_notes: true
           name: LaTeX Studio v${{ steps.pkg.outputs.version }}
           tag_name: v${{ steps.pkg.outputs.version }}
