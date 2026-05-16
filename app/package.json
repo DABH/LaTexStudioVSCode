@@ -2,7 +2,7 @@
   "name": "latex-studio",
   "displayName": "LaTeX Studio",
   "description": "High-quality LaTeX → PDF compilation with live preview, powered by Tectonic and PDF.js.",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "publisher": "bipulraman",
   "engines": {
     "vscode": "^1.90.0"
