@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LaTeX Studio — Write LaTeX in VS Code. See a beautiful PDF.</title>
+  <meta name="description" content="Turn VS Code into a complete LaTeX authoring environment. Zero TeX install. Real PDF preview. Build on save." />
+  <meta name="theme-color" content="#0f172a" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="LaTeX Studio for VS Code" />
+  <meta property="og:description" content="Write LaTeX in VS Code. See a beautiful PDF the moment you save. No TeX install required." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/icon.svg" />
+
+  <link rel="icon" type="image/svg+xml" href="assets/icon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a href="#" class="brand" aria-label="LaTeX Studio home">
+      <img src="assets/icon.svg" alt="" width="32" height="32" />
+      <span>LaTeX Studio</span>
+    </a>
+    <nav class="nav">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#quickstart">Quick start</a>
+      <a href="#faq">FAQ</a>
+      <a class="nav-cta" href="https://marketplace.visualstudio.com/items?itemName=bipulraman.latex-studio" target="_blank" rel="noopener">
+        Install
+      </a>
+    </nav>
+    <button class="nav-toggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <span class="eyebrow">VS Code Extension</span>
+          <h1>Write LaTeX. See a beautiful PDF the moment you save.</h1>
+          <p class="lede">
+            LaTeX Studio turns VS Code into a complete LaTeX authoring environment.
+            No TeX install. No command line. No setup. Open a <code>.tex</code> file
+            and start writing — the real, compiled PDF appears next to your editor
+            and refreshes the instant you save.
+          </p>
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="https://marketplace.visualstudio.com/items?itemName=bipulraman.latex-studio" target="_blank" rel="noopener">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+              Install from Marketplace
+            </a>
+            <a class="btn btn-ghost" href="https://github.com/BipulRaman/LatexStudio" target="_blank" rel="noopener">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.5-1.4-1.3-1.8-1.3-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1.1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.4-1.3-5.4-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.7.2 2.9.1 3.2.7.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>
+              View on GitHub
+            </a>
+          </div>
+          <ul class="hero-bullets">
+            <li><span class="check">✓</span> No TeX Live or MiKTeX install</li>
+            <li><span class="check">✓</span> Real compiled PDF — not an HTML approximation</li>
+            <li><span class="check">✓</span> Free &amp; open source</li>
+          </ul>
+        </div>
+
+        <div class="hero-preview" aria-hidden="true">
+          <div class="window">
+            <div class="window-bar">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+              <span class="window-title">main.tex — LaTeX Studio</span>
+            </div>
+            <div class="window-body">
+              <pre class="code"><code><span class="c">% !TEX root = main.tex</span>
+<span class="k">\documentclass</span>{article}
+<span class="k">\usepackage</span>{amsmath}
+<span class="k">\title</span>{Hello, LaTeX Studio}
+<span class="k">\author</span>{You}
+<span class="k">\begin</span>{document}
+<span class="k">\maketitle</span>
+The Euler identity:
+<span class="k">\begin</span>{equation}
+  e^{i<span class="k">\pi</span>} + 1 = 0
+<span class="k">\end</span>{equation}
+<span class="k">\end</span>{document}</code></pre>
+              <div class="pdf-preview">
+                <div class="pdf-page">
+                  <h3>Hello, LaTeX Studio</h3>
+                  <p class="author">You · today</p>
+                  <p>The Euler identity:</p>
+                  <p class="eq"><em>e<sup>iπ</sup></em> + 1 = 0 &nbsp; <span class="eq-num">(1)</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WHY -->
+    <section class="why" id="why">
+      <div class="section-inner">
+        <div class="why-card">
+          <div class="why-icon">⚡</div>
+          <h3>Zero setup</h3>
+          <p>The first time you build, LaTeX Studio downloads a self-contained <a href="https://tectonic-typesetting.github.io/" target="_blank" rel="noopener">Tectonic</a> engine for your OS. You never have to install TeX Live or manage packages.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">📄</div>
+          <h3>What you see is what you ship</h3>
+          <p>The preview shows the <em>actual</em> compiled PDF rendered by PDF.js — floats, page breaks, math, microtypography, and hyperlinks all look exactly like the final document.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">💾</div>
+          <h3>Feels like Markdown preview</h3>
+          <p>Same <kbd>Ctrl+K V</kbd>, same side-by-side workflow, same auto-refresh-on-save. If you can use Markdown preview, you already know how to use this.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features" id="features">
+      <div class="section-inner">
+        <div class="section-head">
+          <h2>Everything you need to write LaTeX in VS Code</h2>
+          <p>Powerful where it matters, invisible everywhere else.</p>
+        </div>
+
+        <div class="feature-grid">
+          <article class="feature">
+            <div class="feature-icon" data-color="red">📑</div>
+            <h3>Real, live PDF preview</h3>
+            <p>Side-by-side webview rendered by PDF.js. Zoom, fit-to-width, dark mode, scroll position preserved between builds.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" data-color="blue">💾</div>
+            <h3>Build on save</h3>
+            <p>Auto-rebuild on every save. All output goes into a single <code>.latex-build/</code> folder you can <code>.gitignore</code>.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" data-color="amber">❌</div>
+            <h3>Errors in the right place</h3>
+            <p>Build log parsed into VS Code's Problems panel with file + line numbers. Click to jump straight to the offending line.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" data-color="green">📚</div>
+            <h3>Multi-file projects</h3>
+            <p>Drop <code>% !TEX root = ../main.tex</code> in any sub-file and LaTeX Studio always compiles the right root.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" data-color="purple">📖</div>
+            <h3>Bibliographies that just work</h3>
+            <p>Tectonic detects <code>biber</code>/<code>bibtex</code> automatically and runs the right number of passes. No <code>latexmk</code> config.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" data-color="pink">⌨️</div>
+            <h3>Snippets &amp; completion</h3>
+            <p>Snippets for everything you type all day. Completion for <code>\ref</code>, <code>\cite</code>, and <code>\includegraphics</code> paths.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" data-color="indigo">📂</div>
+            <h3>Built-in PDF reader</h3>
+            <p>Click any <code>.pdf</code> in the Explorer to open it in the LaTeX Studio viewer — no more "binary file" warning, even for PDFs you didn't compile.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" data-color="teal">🌙</div>
+            <h3>Dark mode preview</h3>
+            <p>Toggle inverted colors with one click. Easy on the eyes for late-night writing.</p>
+          </article>
+          <article class="feature">
+            <div class="feature-icon" data-color="cyan">🔒</div>
+            <h3>Private by design</h3>
+            <p>No telemetry. No accounts. Your documents never leave your computer.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how" id="how">
+      <div class="section-inner">
+        <div class="section-head">
+          <h2>How it works</h2>
+          <p>The actual LaTeX toolchain is downloaded on demand so the extension stays tiny.</p>
+        </div>
+
+        <ol class="steps">
+          <li>
+            <div class="step-num">1</div>
+            <div>
+              <h3>Install the extension</h3>
+              <p>About 40&nbsp;KB. Nothing else is downloaded yet.</p>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">2</div>
+            <div>
+              <h3>First build → one-time download</h3>
+              <p>You'll be prompted to download the Tectonic engine (~30&nbsp;MB) for your OS. Stored inside the extension folder.</p>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">3</div>
+            <div>
+              <h3>First use of a LaTeX package → fetched from CTAN</h3>
+              <p>Tectonic grabs only what your document needs and caches it locally. No bulk install.</p>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">4</div>
+            <div>
+              <h3>Every subsequent build → fully offline</h3>
+              <p>Zero network access. Just fast, clean PDF compilation.</p>
+            </div>
+          </li>
+        </ol>
+
+        <div class="callout">
+          <strong>Behind a proxy or air-gapped?</strong>
+          Set <code>latexStudio.engine</code> to <code>xelatex</code>, <code>lualatex</code>, or <code>pdflatex</code> to use a TeX distribution you already have installed — nothing extra gets downloaded.
+        </div>
+      </div>
+    </section>
+
+    <!-- QUICK START -->
+    <section class="quickstart" id="quickstart">
+      <div class="section-inner">
+        <div class="section-head">
+          <h2>60-second quick start</h2>
+          <p>From zero to a compiled PDF in under a minute.</p>
+        </div>
+
+        <div class="quickstart-grid">
+          <div class="qs-step">
+            <div class="qs-num">1</div>
+            <p>Install <strong>LaTeX Studio</strong> from the VS Code Marketplace.</p>
+            <pre><code>code --install-extension bipulraman.latex-studio</code></pre>
+          </div>
+          <div class="qs-step">
+            <div class="qs-num">2</div>
+            <p>Open any <code>.tex</code> file and press <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>B</kbd> to build.</p>
+            <pre><code>% main.tex
+\documentclass{article}
+\begin{document}
+Hello, world.
+\end{document}</code></pre>
+          </div>
+          <div class="qs-step">
+            <div class="qs-num">3</div>
+            <p>Approve the one-time engine download (~30 MB), then press <kbd>Ctrl</kbd>+<kbd>K</kbd> <kbd>V</kbd> for the side preview.</p>
+            <pre><code>Save → PDF refreshes automatically</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMMANDS -->
+    <section class="commands">
+      <div class="section-inner">
+        <div class="section-head">
+          <h2>Commands &amp; keybindings</h2>
+          <p>Open the Command Palette (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>) and type "LaTeX".</p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Command</th><th>Windows / Linux</th><th>macOS</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>LaTeX: Build PDF</td><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>B</kbd></td><td><kbd>Cmd</kbd>+<kbd>Alt</kbd>+<kbd>B</kbd></td></tr>
+              <tr><td>LaTeX: Open Preview to the Side</td><td><kbd>Ctrl</kbd>+<kbd>K</kbd> <kbd>V</kbd></td><td><kbd>Cmd</kbd>+<kbd>K</kbd> <kbd>V</kbd></td></tr>
+              <tr><td>LaTeX: Jump to PDF (SyncTeX)</td><td><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>J</kbd></td><td><kbd>Cmd</kbd>+<kbd>Alt</kbd>+<kbd>J</kbd></td></tr>
+              <tr><td>LaTeX: Show Build Log</td><td>—</td><td>—</td></tr>
+              <tr><td>LaTeX: Clean Build Artifacts</td><td>—</td><td>—</td></tr>
+              <tr><td>LaTeX: Download/Update Tectonic Engine</td><td>—</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+      <div class="section-inner">
+        <div class="section-head">
+          <h2>Frequently asked questions</h2>
+        </div>
+
+        <div class="faq-list">
+          <details>
+            <summary>Do I need to install TeX Live or MiKTeX?</summary>
+            <p>No. LaTeX Studio downloads a self-contained Tectonic engine on first use. If you'd rather use a TeX distribution you already have, set <code>latexStudio.engine</code> to <code>xelatex</code>, <code>lualatex</code>, or <code>pdflatex</code>.</p>
+          </details>
+          <details>
+            <summary>How big is the first-run download?</summary>
+            <p>About 30 MB for the Tectonic engine. After that, LaTeX packages your document references are fetched from CTAN on demand (typically a few MB total) and cached locally.</p>
+          </details>
+          <details>
+            <summary>Does it work offline?</summary>
+            <p>Yes — after the first build (which needs the engine) and the first use of any new package (which Tectonic fetches once). After that, builds are fully offline.</p>
+          </details>
+          <details>
+            <summary>I'm behind a corporate proxy. What now?</summary>
+            <p>Either configure a system proxy so Node/HTTPS can reach <code>github.com</code> and <code>ctan.org</code>, or use a local TeX distribution by changing the <code>latexStudio.engine</code> setting.</p>
+          </details>
+          <details>
+            <summary>Can I open existing PDFs with it?</summary>
+            <p>Yes. LaTeX Studio acts as a built-in PDF reader for VS Code. Click any <code>.pdf</code> file in the Explorer and it opens in the same PDF.js viewer used for compiled output.</p>
+          </details>
+          <details>
+            <summary>Does it send any telemetry?</summary>
+            <p>No. No telemetry, no accounts, no analytics. Your documents never leave your machine.</p>
+          </details>
+          <details>
+            <summary>How do I uninstall cleanly?</summary>
+            <p>Run <strong>LaTeX Studio: Reset Everything (Before Uninstall)</strong> from the Command Palette <em>before</em> uninstalling. That removes the downloaded engine and Tectonic's package cache (which VS Code doesn't clean automatically).</p>
+          </details>
+          <details>
+            <summary>Is it open source?</summary>
+            <p>Yes. The source lives on <a href="https://github.com/BipulRaman/LatexStudio" target="_blank" rel="noopener">GitHub</a>. Issues and contributions welcome.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA FOOTER -->
+    <section class="cta-band">
+      <div class="section-inner">
+        <h2>Ready to write?</h2>
+        <p>Install LaTeX Studio and your next paper, thesis, or résumé is one save away.</p>
+        <a class="btn btn-primary btn-large" href="https://marketplace.visualstudio.com/items?itemName=bipulraman.latex-studio" target="_blank" rel="noopener">
+          Install from Marketplace
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="assets/icon.svg" alt="" width="24" height="24" />
+        <span>LaTeX Studio</span>
+      </div>
+      <nav class="footer-links">
+        <a href="https://marketplace.visualstudio.com/items?itemName=bipulraman.latex-studio" target="_blank" rel="noopener">Marketplace</a>
+        <a href="https://github.com/BipulRaman/LatexStudio" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://github.com/BipulRaman/LatexStudio/issues" target="_blank" rel="noopener">Issues</a>
+        <a href="https://tectonic-typesetting.github.io/" target="_blank" rel="noopener">Tectonic</a>
+      </nav>
+      <p class="footer-fineprint">
+        Crafted by <a href="https://github.com/BipulRaman" target="_blank" rel="noopener"><strong>Bipul Raman</strong></a>.
+        Made with <span class="heart">♥</span> for LaTeX. Powered by <a href="https://tectonic-typesetting.github.io/" target="_blank" rel="noopener">Tectonic</a> and <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noopener">PDF.js</a>.
+      </p>
+    </div>
+  </footer>
+
+  <script src="script.js" defer></script>
+</body>
+</html>

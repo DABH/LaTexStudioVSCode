@@ -4,6 +4,18 @@
   "description": "High-quality LaTeX → PDF compilation with live preview, powered by Tectonic and PDF.js.",
   "version": "1.0.0",
   "publisher": "bipulraman",
+  "author": {
+    "name": "Bipul Raman",
+    "url": "https://github.com/BipulRaman"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BipulRaman/LatexStudio.git"
+  },
+  "homepage": "https://github.com/BipulRaman/LatexStudio#readme",
+  "bugs": {
+    "url": "https://github.com/BipulRaman/LatexStudio/issues"
+  },
   "engines": {
     "vscode": "^1.90.0"
   },

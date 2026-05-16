@@ -56,6 +56,9 @@ If the first-run download fails, you have two options:
 ### 📄 Real, live PDF preview
 A side-by-side webview shows the *actual* compiled PDF — rendered by [PDF.js](https://mozilla.github.io/pdf.js/). Floats, page breaks, math, microtypography, and hyperlinks all look exactly like the final document. Scroll position is preserved between builds.
 
+### 📂 Built-in PDF reader
+Click any `.pdf` file in the Explorer to open it in the LaTeX Studio viewer — no more "binary file" warning. Works for any PDF, not just ones you compiled.
+
 ### 💾 Build on save
 Auto-rebuild fires every time you save (toggle off with `latexStudio.build.onSave`). All output goes into a single `.latex-build/` folder you can `.gitignore`.
 
@@ -176,3 +179,7 @@ Run **`LaTeX Studio: Reset Everything (Before Uninstall)`** *before* uninstallin
 ## 📜 License
 
 See the repository for license terms.
+
+---
+
+Crafted by **[Bipul Raman](https://github.com/BipulRaman)**. Made with ♥ for LaTeX.

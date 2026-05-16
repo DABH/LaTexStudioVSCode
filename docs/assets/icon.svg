@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <defs>
+    <linearGradient id="docRed" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#b91c1c"/>
+    </linearGradient>
+  </defs>
+  <!-- document body -->
+  <path d="M5 2h10l4 4v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z" fill="url(#docRed)"/>
+  <!-- folded corner -->
+  <path d="M15 2v3a1 1 0 0 0 1 1h3z" fill="#7f1d1d"/>
+  <!-- TeX lambda -->
+  <text x="12" y="18.5" font-family="'Times New Roman', Georgia, serif" font-style="italic" font-weight="bold" font-size="12" fill="white" text-anchor="middle">λ</text>
+</svg>

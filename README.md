@@ -122,3 +122,7 @@ This repository contains the extension source under [`app/`](app/). For the arch
 ## License
 
 See [LICENSE](LICENSE) (if present in this repository) or the marketplace listing for license terms.
+
+---
+
+Crafted by **[Bipul Raman](https://github.com/BipulRaman)**. Made with ♥ for LaTeX.
