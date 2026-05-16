@@ -8,6 +8,11 @@ on:
       - '.github/workflows/publish.yml'
   workflow_dispatch:
     inputs:
+      bump:
+        description: 'Version bump (relative to the version on the Marketplace)'
+        type: choice
+        default: patch
+        options: [patch, minor, major]
       dry_run:
         description: 'Build & package only, do not publish'
         type: boolean
@@ -36,13 +41,12 @@ jobs:
       # the engine is fetched at runtime by the extension itself, and
       # `bin/**` is excluded by .vscodeignore anyway.
       LATEXSTUDIO_SKIP_DOWNLOAD: '1'
+      # Default to patch bumps on push-to-main. workflow_dispatch can override.
+      BUMP: ${{ github.event.inputs.bump || 'patch' }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          # Need previous commit to detect version bumps on push-to-main.
-          fetch-depth: 2
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -51,48 +55,86 @@ jobs:
           cache: 'npm'
           cache-dependency-path: app/package-lock.json
 
-      - name: Read extension identifier
+      - name: Compute next version (auto-bump from Marketplace)
         id: pkg
         shell: bash
         run: |
-          version=$(node -p "require('./package.json').version")
+          set -euo pipefail
           publisher=$(node -p "require('./package.json').publisher")
           name=$(node -p "require('./package.json').name")
-          vsix="${publisher}.${name}-${version}.vsix"
+          id="${publisher}.${name}"
+          echo "Extension id: $id"
+          echo "Bump kind:    ${BUMP}"
+
+          # Marketplace lookup runs in Node so we can use built-in fetch.
+          # On any failure (404, network, parse) we fall back to the version
+          # already in package.json — that path is used on the very first
+          # publish when the extension doesn't exist on the Marketplace yet.
+          next=$(BUMP="$BUMP" ID="$id" LOCAL="$(node -p "require('./package.json').version")" node <<'NODE'
+            const id = process.env.ID;
+            const bump = process.env.BUMP || 'patch';
+            const local = process.env.LOCAL;
+
+            function nextSemver(v, kind) {
+              const [maj, min, pat] = v.split('.').map(n => parseInt(n, 10) || 0);
+              if (kind === 'major') return `${maj + 1}.0.0`;
+              if (kind === 'minor') return `${maj}.${min + 1}.0`;
+              return `${maj}.${min}.${pat + 1}`;
+            }
+
+            (async () => {
+              try {
+                const res = await fetch(
+                  'https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery',
+                  {
+                    method: 'POST',
+                    headers: {
+                      'Accept': 'application/json;api-version=3.0-preview.1',
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      filters: [{ criteria: [{ filterType: 7, value: id }] }],
+                      flags: 0x100
+                    })
+                  }
+                );
+                const j = await res.json();
+                const published = j?.results?.[0]?.extensions?.[0]?.versions?.[0]?.version;
+                if (published) {
+                  const n = nextSemver(published, bump);
+                  console.error(`Marketplace latest: ${published}  →  next: ${n}`);
+                  process.stdout.write(n);
+                  return;
+                }
+                console.error(`Extension ${id} not found on Marketplace. First publish uses local version: ${local}`);
+                process.stdout.write(local);
+              } catch (err) {
+                console.error(`Marketplace query failed: ${err.message}. Falling back to local version: ${local}`);
+                process.stdout.write(local);
+              }
+            })();
+          NODE
+          )
+
+          if [ -z "$next" ]; then
+            echo "::error::Failed to determine next version."
+            exit 1
+          fi
+
+          # Update package.json in-flight (not committed back to the repo).
+          npm version "$next" --no-git-tag-version --allow-same-version >/dev/null
+
+          vsix="${publisher}.${name}-${next}.vsix"
           {
-            echo "version=$version"
+            echo "version=$next"
             echo "publisher=$publisher"
             echo "name=$name"
+            echo "id=$id"
             echo "vsix=$vsix"
           } >> "$GITHUB_OUTPUT"
-          echo "Will package as $vsix"
-
-      - name: Decide whether to publish
-        id: gate
-        shell: bash
-        run: |
-          # Manual dispatch always proceeds (dry_run controls publish steps).
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "proceed=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          current="${{ steps.pkg.outputs.version }}"
-          previous=""
-          if git show HEAD~1:app/package.json > /tmp/prev-package.json 2>/dev/null; then
-            previous=$(node -p "require('/tmp/prev-package.json').version" 2>/dev/null || echo "")
-          fi
-          echo "Previous version: ${previous:-<none>}"
-          echo "Current  version: $current"
-          if [ -z "$previous" ] || [ "$current" != "$previous" ]; then
-            echo "proceed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "proceed=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Version unchanged ($current) — skipping build & publish."
-          fi
+          echo "Packaging as: $vsix"
 
       - name: Install dependencies
-        if: steps.gate.outputs.proceed == 'true'
         run: |
           if [ -f package-lock.json ]; then
             npm ci
@@ -101,40 +143,36 @@ jobs:
           fi
 
       - name: Compile
-        if: steps.gate.outputs.proceed == 'true'
         run: npm run compile
 
       - name: Install vsce & ovsx
-        if: steps.gate.outputs.proceed == 'true'
         run: npm install --no-save @vscode/vsce ovsx
 
       - name: Package VSIX
-        if: steps.gate.outputs.proceed == 'true'
-        run: npx vsce package --out "${{ steps.pkg.outputs.vsix }}"
+        run: npx vsce package --allow-missing-repository --out "${{ steps.pkg.outputs.vsix }}"
 
       - name: Upload VSIX artifact
-        if: steps.gate.outputs.proceed == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.pkg.outputs.publisher }}.${{ steps.pkg.outputs.name }}-${{ steps.pkg.outputs.version }}
+          name: ${{ steps.pkg.outputs.id }}-${{ steps.pkg.outputs.version }}
           path: app/${{ steps.pkg.outputs.vsix }}
           if-no-files-found: error
 
       - name: Publish to VS Code Marketplace
-        if: ${{ steps.gate.outputs.proceed == 'true' && github.event.inputs.dry_run != 'true' }}
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: npx vsce publish --packagePath "${{ steps.pkg.outputs.vsix }}"
 
       - name: Publish to Open VSX
-        if: ${{ steps.gate.outputs.proceed == 'true' && github.event.inputs.dry_run != 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.publish_ovsx == 'true') }}
+        if: ${{ github.event.inputs.dry_run != 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.publish_ovsx == 'true') }}
         env:
           OVSX_PAT: ${{ secrets.OVSX_PAT }}
         run: npx ovsx publish "${{ steps.pkg.outputs.vsix }}" -p "$OVSX_PAT"
         continue-on-error: true
 
       - name: Create GitHub Release
-        if: ${{ steps.gate.outputs.proceed == 'true' && github.event.inputs.dry_run != 'true' }}
+        if: ${{ github.event.inputs.dry_run != 'true' }}
         uses: softprops/action-gh-release@v2
         with:
           files: app/${{ steps.pkg.outputs.vsix }}
