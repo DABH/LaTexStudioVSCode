@@ -447,6 +447,11 @@ export function buildPdfWebviewHtml(
 
   const vscode = acquireVsCodeApi();
 
+  // View state persisted across webview recreation (window reload, tab
+  // close/reopen). Consumed once by the first load(); live reloads use the
+  // in-context capture in load() instead.
+  let restoredStateOnce = (typeof vscode.getState === 'function' && vscode.getState()) || null;
+
   // --- State -----------------------------------------------------------------
   let currentUrl   = ${JSON.stringify(pdfUri)};
   let pdfDoc       = null;
@@ -460,6 +465,9 @@ export function buildPdfWebviewHtml(
   let outline      = null;
   let destinations = new Map();               // page index -> array of {dest, label}
   let loadGen      = 0;                       // bumped on each load(); guards races
+  if (restoredStateOnce && typeof restoredStateOnce.scaleMode !== 'undefined' && restoredStateOnce.scaleMode !== null) {
+    scaleMode = restoredStateOnce.scaleMode;  // keep the user's zoom across webview recreation
+  }
 
   const DPR = Math.min(window.devicePixelRatio || 1, 3);
 
@@ -499,6 +507,12 @@ export function buildPdfWebviewHtml(
   async function load(url) {
     if (!url) return;
     const myGen = ++loadGen;
+    // Capture the reading position before teardown: clearing #viewer
+    // collapses the scroll container (the browser clamps scrollTop to 0), so
+    // without restoring it every rebuild lands back on page 1.
+    const prevScrollTop  = viewerContainer.scrollTop;
+    const prevScrollLeft = viewerContainer.scrollLeft;
+    const prevPage       = currentPage;
     // Tear down any previous document so its workers/pages are released and
     // cannot deliver stale results to the new pageViews array.
     if (pdfDoc) {
@@ -549,6 +563,25 @@ export function buildPdfWebviewHtml(
 
       // Reset thumbnails sidebar — old thumbnails belong to the old document.
       thumbnailView.innerHTML = '';
+
+      // Restore the reading position. The placeholders above are laid out at
+      // the same page size and scale as before the reload, so the captured
+      // pixel offsets map to the same spot (assignment clamps automatically
+      // if the rebuilt document is shorter). On a fresh webview (window
+      // reload / tab reopen) fall back to the state persisted via setState.
+      if (prevScrollTop > 0 || prevScrollLeft > 0) {
+        viewerContainer.scrollTop  = prevScrollTop;
+        viewerContainer.scrollLeft = prevScrollLeft;
+        currentPage = Math.max(1, Math.min(prevPage, numPages));
+        pageNumberInput.value = String(currentPage);
+      } else if (restoredStateOnce && (restoredStateOnce.scrollTop > 0 || restoredStateOnce.scrollLeft > 0)) {
+        viewerContainer.scrollTop  = restoredStateOnce.scrollTop  || 0;
+        viewerContainer.scrollLeft = restoredStateOnce.scrollLeft || 0;
+        currentPage = Math.max(1, Math.min(restoredStateOnce.page || 1, numPages));
+        pageNumberInput.value = String(currentPage);
+      }
+      restoredStateOnce = null;
+      saveViewState();
 
       await renderVisiblePages();
       if (myGen !== loadGen) return;
@@ -724,6 +757,22 @@ export function buildPdfWebviewHtml(
   }
 
   // --- Scroll tracking -------------------------------------------------------
+  // Persist the view state (throttled) so a recreated webview can restore it.
+  let saveStateTimer = null;
+  function saveViewState() {
+    if (typeof vscode.setState !== 'function') return;
+    if (saveStateTimer) return;
+    saveStateTimer = setTimeout(() => {
+      saveStateTimer = null;
+      vscode.setState({
+        scrollTop: viewerContainer.scrollTop,
+        scrollLeft: viewerContainer.scrollLeft,
+        page: currentPage,
+        scaleMode
+      });
+    }, 250);
+  }
+
   viewerContainer.addEventListener('scroll', () => {
     queue(renderVisiblePages);
     const ct = viewerContainer.scrollTop + viewerContainer.clientHeight / 3;
@@ -738,6 +787,7 @@ export function buildPdfWebviewHtml(
         break;
       }
     }
+    saveViewState();
   }, { passive: true });
 
   // --- Navigation ------------------------------------------------------------
@@ -761,6 +811,7 @@ export function buildPdfWebviewHtml(
       currentScale = computeScale(base);
       updateScaleSelectFromMode();
       queue(rerenderAll);
+      saveViewState();
     });
   }
   zoomInBtn.onclick  = () => setScale(String(Math.min(4,   Math.round((currentScale + 0.1) * 100) / 100)));
