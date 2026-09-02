@@ -14,7 +14,7 @@ const { execSync } = require('child_process');
 
 const streamPipeline = promisify(pipeline);
 
-const TECTONIC_VERSION = '0.15.0';
+const TECTONIC_VERSION = '0.17.0';
 
 /** GitHub release asset name for each platform. */
 function assetForPlatform() {
